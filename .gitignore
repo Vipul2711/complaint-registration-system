@@ -59,3 +59,6 @@ coverage/
 # 🚫 IMPORTANT (YOUR BACKEND)
 ############################
 Complaint_register/src/main/resources/application.properties
+application.properties
+**/application.properties
+.env
