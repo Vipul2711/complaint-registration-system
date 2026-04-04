@@ -1,18 +1,61 @@
-# Node
-node_modules/
+############################
+# 🔐 ENV & SECRETS
+############################
 .env
+*.env
+application.properties
 
-# Build
+############################
+# 📦 Node / Frontend
+############################
+node_modules/
 dist/
 build/
+.cache/
+.next/
+out/
 
-# Logs
-logs
+############################
+# 🧱 Java / Spring Boot
+############################
+target/
 *.log
+*.class
 
-# OS
-.DS_Store
-
-# IDE
+############################
+# 🛠 IDE / Editor
+############################
 .vscode/
-backend/src/main/resources/application.properties
+.idea/
+*.iml
+
+############################
+# 💻 OS FILES
+############################
+.DS_Store
+Thumbs.db
+
+############################
+# 📜 Logs
+############################
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+############################
+# 🧪 Testing / Coverage
+############################
+coverage/
+
+############################
+# ⚙️ Misc
+############################
+*.swp
+*.swo
+
+############################
+# 🚫 IMPORTANT (YOUR BACKEND)
+############################
+Complaint_register/src/main/resources/application.properties
