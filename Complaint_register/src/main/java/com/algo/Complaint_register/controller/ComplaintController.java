@@ -2,7 +2,9 @@ package com.algo.Complaint_register.controller;
 
 import com.algo.Complaint_register.dto.ComplaintCitizenViewDto;
 import com.algo.Complaint_register.dto.ComplaintRequest;
+import com.algo.Complaint_register.dto.UserStatsDTO;
 import com.algo.Complaint_register.model.Complaint;
+import com.algo.Complaint_register.model.User;
 import com.algo.Complaint_register.service.ComplaintService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 
 @RestController
 @RequestMapping("/api/citizen")
@@ -50,6 +53,17 @@ public class ComplaintController {
 
         complaintService.deleteComplaint(id, currentUser);
         return ResponseEntity.ok("Complaint closed successfully");
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<UserStatsDTO> getUserStats(
+            @AuthenticationPrincipal UserDetails currentUser) {
+
+        String username = currentUser.getUsername();
+
+        UserStatsDTO stats = complaintService.getUserStats(username);
+
+        return ResponseEntity.ok(stats);
     }
 
 }

@@ -1,9 +1,6 @@
 package com.algo.Complaint_register.service;
 
-import com.algo.Complaint_register.dto.ComplaintAdminViewDto;
-import com.algo.Complaint_register.dto.ComplaintAssignmentRequest;
-import com.algo.Complaint_register.dto.ComplaintCitizenViewDto;
-import com.algo.Complaint_register.dto.ComplaintRequest;
+import com.algo.Complaint_register.dto.*;
 import com.algo.Complaint_register.model.*;
 import com.algo.Complaint_register.repository.Complaint_Repo;
 import com.algo.Complaint_register.repository.User_Repo;
@@ -362,5 +359,25 @@ public class ComplaintService {
                 c.getImageUrl()
 
         ));
+    }
+
+    public UserStatsDTO getUserStats(String username) {
+
+        long total = complaintRepo.countBySubmittedByUsername(username);
+
+        long submitted = complaintRepo.countBySubmittedByUsernameAndStatus(username, Status.SUBMITTED);
+        long assigned = complaintRepo.countBySubmittedByUsernameAndStatus(username, Status.ASSIGNED);
+        long inProgress = complaintRepo.countBySubmittedByUsernameAndStatus(username, Status.IN_PROGRESS);
+        long resolved = complaintRepo.countBySubmittedByUsernameAndStatus(username, Status.RESOLVED);
+        long closed = complaintRepo.countBySubmittedByUsernameAndStatus(username, Status.CLOSED);
+
+        return new UserStatsDTO(
+                total,
+                submitted,
+                assigned,
+                inProgress,
+                resolved,
+                closed
+        );
     }
 }

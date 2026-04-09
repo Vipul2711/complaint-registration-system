@@ -36,5 +36,7 @@ List<Complaint>findAllByStatusAndAssignedAtBefore(Status status, LocalDateTime b
             @Param("priority") Priority priority,
             Pageable pageable
     );
+    long countBySubmittedByUsername(String username);
 
+    long countBySubmittedByUsernameAndStatus(String username, Status status);
 }
