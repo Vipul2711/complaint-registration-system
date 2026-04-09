@@ -10,11 +10,15 @@ import "leaflet/dist/leaflet.css";
 import "../leafletFix";
 
 // 📍 Marker + Click handler
-function LocationMarker({ setLatitude, setLongitude, position, setPosition }) {
+function LocationMarker({
+  setLatitude,
+  setLongitude,
+  position,
+  setPosition,
+}) {
   useMapEvents({
     click(e) {
       const { lat, lng } = e.latlng;
-
       setLatitude(lat);
       setLongitude(lng);
       setPosition({ lat, lng });
@@ -34,7 +38,7 @@ function ChangeView({ position }) {
         animate: true,
       });
     }
-  }, [position]);
+  }, [position, map]);
 
   return null;
 }
@@ -45,56 +49,18 @@ function LocationPicker({
   position,
   setPosition,
 }) {
-  // 📍 GPS function
-  const handleUseMyLocation = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation not supported ❌");
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-
-        setLatitude(lat);
-        setLongitude(lng);
-        setPosition({ lat, lng });
-      },
-      (err) => {
-        console.log(err);
-        alert("Failed to get location ❌");
-      },
-      {
-        enableHighAccuracy: true,
-      }
-    );
-  };
-
   return (
-    <div style={{ marginTop: "10px" }}>
-      {/* 🔥 GPS BUTTON */}
-      <button type="button" onClick={handleUseMyLocation}>
-        📍 Use My Location
-      </button>
-
-      <p style={{ marginTop: "5px" }}>
-        👉 Or click on map to select location
-      </p>
-
+    <div className="w-full">
+      {/* Map Container */}
       <div
-        style={{ height: "400px", width: "100%", overflow: "hidden" }}
+        className="h-[400px] w-full rounded-xl overflow-hidden border border-gray-200 shadow-sm"
         onWheel={(e) => e.stopPropagation()}
       >
         <MapContainer
           center={[19.076, 72.8777]}
           zoom={13}
-          style={{ height: "100%", width: "100%" }}
+          className="h-full w-full z-0"
           scrollWheelZoom={true}
-          dragging={true}
-          doubleClickZoom={true}
-          touchZoom={true}
-          tap={false}
         >
           <TileLayer
             attribution="© OpenStreetMap"
@@ -108,7 +74,6 @@ function LocationPicker({
             setPosition={setPosition}
           />
 
-          {/* 🔥 Auto move map */}
           <ChangeView position={position} />
         </MapContainer>
       </div>

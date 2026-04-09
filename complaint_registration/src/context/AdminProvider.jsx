@@ -14,18 +14,25 @@ function AdminProvider({ children }) {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
   };
-
- const fetchComplaints = async ({
+const fetchComplaints = async ({
   page = 0,
   sortBy = "createdAt",
   sortDir = "desc",
   status = "ALL",
-  priority = "ALL", // ✅ NEW
+  priority = "ALL",
+  deptId = null, // ✅ ADD THIS
 }) => {
   dispatch({ type: "SET_LOADING" });
 
   try {
-    let url = `${API}/complaints?page=${page}&size=5&sortBy=${sortBy}&sortDir=${sortDir}`;
+    let url = "";
+
+    // ✅ SWITCH API BASED ON deptId
+    if (deptId) {
+      url = `${API}/complaints/by-department/${deptId}?page=${page}&size=5&sortBy=${sortBy}&sortDir=${sortDir}`;
+    } else {
+      url = `${API}/complaints?page=${page}&size=5&sortBy=${sortBy}&sortDir=${sortDir}`;
+    }
 
     // ✅ STATUS FILTER
     if (status !== "ALL") {

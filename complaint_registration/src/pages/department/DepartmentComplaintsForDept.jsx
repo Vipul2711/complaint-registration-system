@@ -26,10 +26,8 @@ function DepartmentComplaintsForDept() {
     fetchComplaints();
   }, [page, sortBy, sortDir, statusFilter, priorityFilter]);
 
-  // ✅ START WORK
   const handleStart = async (id) => {
     setLoadingId(id);
-
     try {
       const res = await fetch(
         `http://localhost:8080/api/department/start_work/${id}`,
@@ -38,14 +36,11 @@ function DepartmentComplaintsForDept() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
       if (!res.ok) throw new Error();
-
       dispatch({
         type: "SHOW_TOAST",
         payload: { message: "Work started successfully", type: "success" },
       });
-
       fetchComplaints();
     } catch {
       dispatch({
@@ -53,14 +48,11 @@ function DepartmentComplaintsForDept() {
         payload: { message: "Failed to start work", type: "error" },
       });
     }
-
     setLoadingId(null);
   };
 
-  // ✅ RESOLVE
   const handleResolve = async (id) => {
     setLoadingId(id);
-
     try {
       const res = await fetch(
         `http://localhost:8080/api/department/resolve/${id}`,
@@ -69,14 +61,11 @@ function DepartmentComplaintsForDept() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
       if (!res.ok) throw new Error();
-
       dispatch({
         type: "SHOW_TOAST",
         payload: { message: "Complaint resolved", type: "success" },
       });
-
       fetchComplaints();
     } catch {
       dispatch({
@@ -84,102 +73,136 @@ function DepartmentComplaintsForDept() {
         payload: { message: "Failed to resolve complaint", type: "error" },
       });
     }
-
     setLoadingId(null);
   };
 
-  if (loading) return <p>Loading...</p>;
-
   return (
-    <div style={{ padding: "20px" }}>
-      {/* ✅ TOAST */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => dispatch({ type: "HIDE_TOAST" })}
-        />
-      )}
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Toast */}
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => dispatch({ type: "HIDE_TOAST" })}
+          />
+        )}
 
-      <h2>Assigned Complaints ({totalElements})</h2>
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <div>
+            <h1 className="text-3xl font-extrabold text-gray-900">
+              Assigned Complaints
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Total complaints: <span className="font-semibold text-gray-700">{totalElements}</span>
+            </p>
+          </div>
 
-      {/* FILTER */}
-      <select
-        value={statusFilter}
-        onChange={(e) =>
-          dispatch({
-            type: "SET_FILTERS",
-            payload: { status: e.target.value, priority: priorityFilter },
-          })
-        }
-      >
-        <option value="ALL">All Status</option>
-        <option value="ASSIGNED">Assigned</option>
-        <option value="IN_PROGRESS">In Progress</option>
-        <option value="RESOLVED">Resolved</option>
-      </select>
+          {/* Filters */}
+          <div className="flex flex-wrap gap-3">
+            <select
+              value={statusFilter}
+              onChange={(e) =>
+                dispatch({
+                  type: "SET_FILTERS",
+                  payload: { status: e.target.value, priority: priorityFilter },
+                })
+              }
+              className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition cursor-pointer"
+            >
+              <option value="ALL">All Status</option>
+              <option value="ASSIGNED">Assigned</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="RESOLVED">Resolved</option>
+              <option value="CLOSED">Closed</option>
+            </select>
 
-      {/* SORT */}
-      <div style={{ marginBottom: "15px" }}>
-        <select
-          value={sortBy}
-          onChange={(e) =>
-            dispatch({
-              type: "SET_SORT",
-              payload: { sortBy: e.target.value, sortDir },
-            })
-          }
-        >
-          <option value="createdAt">Latest</option>
-          <option value="priority">Priority</option>
-          <option value="status">Status</option>
-        </select>
+            <select
+              value={sortBy}
+              onChange={(e) =>
+                dispatch({
+                  type: "SET_SORT",
+                  payload: { sortBy: e.target.value, sortDir },
+                })
+              }
+              className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition cursor-pointer"
+            >
+              <option value="createdAt">Latest</option>
+              <option value="priority">Priority</option>
+              <option value="status">Status</option>
+            </select>
 
-        <select
-          value={sortDir}
-          onChange={(e) =>
-            dispatch({
-              type: "SET_SORT",
-              payload: { sortBy, sortDir: e.target.value },
-            })
-          }
-          style={{ marginLeft: "10px" }}
-        >
-          <option value="desc">Descending</option>
-          <option value="asc">Ascending</option>
-        </select>
-      </div>
+            <select
+              value={sortDir}
+              onChange={(e) =>
+                dispatch({
+                  type: "SET_SORT",
+                  payload: { sortBy, sortDir: e.target.value },
+                })
+              }
+              className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition cursor-pointer"
+            >
+              <option value="desc">Descending</option>
+              <option value="asc">Ascending</option>
+            </select>
+          </div>
+        </div>
 
-      {/* LIST */}
-      {complaints.map((c) => (
-        <DepartmentComplaintCard
-          key={c.id}
-          complaint={c}
-          onStart={handleStart}
-          onResolve={handleResolve}
-          loadingId={loadingId}
-        />
-      ))}
+        {/* Content */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-5">
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <svg className="animate-spin h-10 w-10 text-blue-600" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            </div>
+          ) : complaints.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="text-6xl mb-4">📋</div>
+              <h3 className="text-lg font-medium text-gray-700 mb-1">No complaints found</h3>
+              <p className="text-sm text-gray-500">Try adjusting your filters.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {complaints.map((c) => (
+                <DepartmentComplaintCard
+                  key={c.id}
+                  complaint={c}
+                  onStart={handleStart}
+                  onResolve={handleResolve}
+                  loadingId={loadingId}
+                />
+              ))}
+            </div>
+          )}
 
-      {/* PAGINATION */}
-      <div>
-        <button
-          onClick={() => dispatch({ type: "SET_PAGE", payload: page - 1 })}
-          disabled={page === 0}
-        >
-          Prev
-        </button>
+          {/* Pagination */}
+          {!loading && complaints.length > 0 && (
+            <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+              <button
+                onClick={() => dispatch({ type: "SET_PAGE", payload: page - 1 })}
+                disabled={page === 0}
+                className="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ← Previous
+              </button>
 
-        <span>
-          Page {page + 1} of {totalPages}
-        </span>
+              <span className="text-sm text-gray-600">
+                Page <span className="font-semibold">{page + 1}</span> of {totalPages}
+              </span>
 
-        <button
-          onClick={() => dispatch({ type: "SET_PAGE", payload: page + 1 })}
-          disabled={page + 1 === totalPages}
-        >
-          Next
-        </button>
+              <button
+                onClick={() => dispatch({ type: "SET_PAGE", payload: page + 1 })}
+                disabled={page + 1 === totalPages}
+                className="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next →
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

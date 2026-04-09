@@ -1,111 +1,100 @@
 import React from "react";
 
-function ComplaintCardDepartment({ complaint, onStart, onResolve, loadingId }) {
+function DepartmentComplaintCard({ complaint, onStart, onResolve, loadingId }) {
   const c = complaint;
 
-  const formatDate = (date) => new Date(date).toLocaleString();
+  const formatDate = (date) =>
+    new Date(date).toLocaleString("en-IN");
 
-  const getStatusColor = () => {
-    if (c.status === "ASSIGNED") return "#f39c12";
-    if (c.status === "IN_PROGRESS") return "#3498db";
-    if (c.status === "RESOLVED") return "#2ecc71";
-    return "#555";
+  // 🎯 SAME COLORS AS USER PANEL
+  const statusConfig = {
+    SUBMITTED: {
+      label: "Submitted",
+      badge: "bg-blue-100 text-blue-700 border-blue-300",
+      border: "border-blue-500",
+    },
+    ASSIGNED: {
+      label: "Assigned",
+      badge: "bg-yellow-100 text-yellow-700 border-yellow-300",
+      border: "border-yellow-500",
+    },
+    IN_PROGRESS: {
+      label: "In Progress",
+      badge: "bg-orange-100 text-orange-700 border-orange-300",
+      border: "border-orange-500",
+    },
+    RESOLVED: {
+      label: "Resolved",
+      badge: "bg-green-100 text-green-700 border-green-300",
+      border: "border-green-500",
+    },
+    CLOSED: {
+      label: "Closed",
+      badge: "bg-red-100 text-red-700 border-red-300",
+      border: "border-red-500",
+    },
   };
+
+  const currentStatus =
+    statusConfig[c.status] || statusConfig.SUBMITTED;
 
   return (
     <div
-      style={{
-        border: "1px solid #ddd",
-        margin: "15px 0",
-        padding: "20px",
-        borderRadius: "12px",
-        background: "#fff",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-      }}
+      className={`bg-white border ${currentStatus.border} border-l-4 rounded-xl p-5 shadow-sm`}
     >
       {/* HEADER */}
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <h4>Complaint #{c.id}</h4>
+      <div className="flex justify-between mb-3">
+        <h2 className="text-sm font-semibold">
+          Complaint #{c.id}
+        </h2>
+
         <span
-          style={{
-            background: getStatusColor(),
-            color: "#fff",
-            padding: "4px 10px",
-            borderRadius: "8px",
-            fontSize: "12px",
-          }}
+          className={`text-xs px-3 py-1 rounded-full border ${currentStatus.badge}`}
         >
-          {c.status}
+          {currentStatus.label}
         </span>
       </div>
 
       {/* DESCRIPTION */}
-      <p style={{ margin: "10px 0" }}>{c.description}</p>
+      <p className="text-sm text-gray-600 mb-3">
+        {c.description}
+      </p>
 
-      {/* ✅ VIEW IMAGE BUTTON */}
+      {/* META */}
+      <div className="text-xs text-gray-500 space-y-1">
+        <p>User: {c.userName}</p>
+        <p>Submitted: {formatDate(c.submittedAt)}</p>
+      </div>
+
+      {/* IMAGE */}
       {c.imageUrl && (
         <button
           onClick={() => window.open(c.imageUrl, "_blank")}
-          style={{
-            background: "#555",
-            color: "#fff",
-            border: "none",
-            padding: "6px 10px",
-            borderRadius: "6px",
-            cursor: "pointer",
-            marginBottom: "10px",
-          }}
+          className="text-xs bg-black text-white px-3 py-1 rounded mt-3"
         >
-          👁 View Image
+          View Image
         </button>
       )}
 
-      {/* DETAILS */}
-      <div style={{ fontSize: "14px", color: "#555" }}>
-        <p><b>User:</b> {c.submittedByUsername}</p>
-        <p><b>Submitted:</b> {formatDate(c.submittedAt)}</p>
-
-        <p>
-          <b>Priority:</b>{" "}
-          <span
-            style={{
-              color: c.priority === "HIGH" ? "red" : "#333",
-              fontWeight: c.priority === "HIGH" ? "bold" : "normal",
-            }}
-          >
-            {c.priority}
-          </span>
-        </p>
-      </div>
-
       {/* LOCATION */}
-      {c.latitude && c.longitude && (
-        <p>
-          📍{" "}
-          <a
-            href={`https://www.google.com/maps?q=${c.latitude},${c.longitude}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            View Location
-          </a>
-        </p>
+      {c.latitude && (
+        <a
+          href={`https://www.google.com/maps?q=${c.latitude},${c.longitude}`}
+          target="_blank"
+          rel="noreferrer"
+          className="block text-xs text-blue-600 mt-2"
+        >
+          View Location
+        </a>
       )}
 
-      {/* ACTION BUTTONS */}
-      <div style={{ marginTop: "15px" }}>
+      {/* ACTIONS */}
+      <div className="mt-4 flex gap-2">
         {c.status === "ASSIGNED" && (
           <button
             onClick={() => onStart(c.id)}
             disabled={loadingId === c.id}
-            style={{
-              background: "#3498db",
-              color: "#fff",
-              border: "none",
-              padding: "8px 12px",
-              borderRadius: "6px",
-              cursor: "pointer",
-            }}
+            className="text-xs bg-blue-600 text-white px-3 py-1 rounded"
           >
             {loadingId === c.id ? "Starting..." : "Start Work"}
           </button>
@@ -115,17 +104,9 @@ function ComplaintCardDepartment({ complaint, onStart, onResolve, loadingId }) {
           <button
             onClick={() => onResolve(c.id)}
             disabled={loadingId === c.id}
-            style={{
-              background: "#2ecc71",
-              color: "#fff",
-              border: "none",
-              padding: "8px 12px",
-              borderRadius: "6px",
-              cursor: "pointer",
-              marginLeft: "10px",
-            }}
+            className="text-xs bg-green-600 text-white px-3 py-1 rounded"
           >
-            {loadingId === c.id ? "Resolving..." : "Mark Resolved"}
+            {loadingId === c.id ? "Resolving..." : "Resolve"}
           </button>
         )}
       </div>
@@ -133,4 +114,4 @@ function ComplaintCardDepartment({ complaint, onStart, onResolve, loadingId }) {
   );
 }
 
-export default ComplaintCardDepartment;
+export default DepartmentComplaintCard;

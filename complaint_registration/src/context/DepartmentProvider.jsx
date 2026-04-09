@@ -48,12 +48,11 @@ export const DepartmentProvider = ({ children }) => {
       );
 
       const firstData = await firstRes.json();
-
       let all = [...firstData.content];
       const totalPages = firstData.totalPages;
-
+      
       const promises = [];
-
+      
       for (let i = 1; i < totalPages; i++) {
         promises.push(
           fetch(
@@ -64,12 +63,14 @@ export const DepartmentProvider = ({ children }) => {
           ).then((res) => res.json())
         );
       }
-
+      
       const results = await Promise.all(promises);
-
+      
       results.forEach((r) => {
         all = [...all, ...r.content];
       });
+      console.log("🔥 First Page:", firstData);
+console.log("🔥 Combined Data:", all);
 
       dispatch({ type: "SET_ALL_DATA", payload: all });
     } catch (err) {

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 function ComplaintCardAdmin({
   complaint,
-  type = "admin",
   onClose,
   onAssign,
   loadingId,
@@ -13,149 +12,168 @@ function ComplaintCardAdmin({
   const [showAssign, setShowAssign] = useState(false);
   const [selectedDept, setSelectedDept] = useState("");
 
-  const formatDate = (date) => new Date(date).toLocaleString();
+  const formatDate = (date) => new Date(date).toLocaleString("en-IN");
 
-  const getStatusColor = () => {
-    if (c.status === "SUBMITTED") return "orange";
-    if (c.status === "ASSIGNED") return "blue";
-    if (c.status === "RESOLVED") return "green";
-    return "red";
+  // Status configuration with left border accent
+  const statusConfig = {
+    SUBMITTED: {
+      border: "border-l-4 border-blue-400",
+      badge: "bg-blue-100 text-blue-700",
+    },
+    ASSIGNED: {
+      border: "border-l-4 border-amber-400",
+      badge: "bg-amber-100 text-amber-700",
+    },
+    IN_PROGRESS: {
+      border: "border-l-4 border-orange-400",
+      badge: "bg-orange-100 text-orange-700",
+    },
+    RESOLVED: {
+      border: "border-l-4 border-emerald-400",
+      badge: "bg-emerald-100 text-emerald-700",
+    },
+    CLOSED: {
+      border: "border-l-4 border-gray-400",
+      badge: "bg-gray-100 text-gray-700",
+    },
+  };
+
+  const priorityConfig = {
+    LOW: "text-gray-500",
+    NORMAL: "text-blue-600 font-medium",
+    HIGH: "text-amber-600 font-medium",
   };
 
   const isUnassigned =
-    !c.assignedDepartmentName ||
-    c.assignedDepartmentName === "Unassigned";
+    !c.assignedDepartmentName || c.assignedDepartmentName === "Unassigned";
+
+  const currentStatus = statusConfig[c.status] || statusConfig.SUBMITTED;
 
   return (
     <div
-      style={{
-        border: "1px solid #ccc",
-        margin: "12px",
-        padding: "15px",
-        borderRadius: "10px",
-        background: "#f9f9f9",
-      }}
+      className={`bg-white rounded-xl p-5 shadow-sm ${currentStatus.border} hover:shadow-md transition-all duration-200`}
     >
-      <p><b>ID:</b> {c.id}</p>
+      {/* Header */}
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-semibold text-gray-900">
+              Complaint #{c.id}
+            </h3>
+            <span
+              className={`text-xs font-medium px-2.5 py-1 rounded-full ${currentStatus.badge}`}
+            >
+              {c.status.replace("_", " ")}
+            </span>
+          </div>
+          <p className="text-xs text-gray-500 mt-1">{formatDate(c.submittedAt)}</p>
+        </div>
+      </div>
 
-      <p><b>Description:</b> {c.description}</p>
+      {/* Description */}
+      <p className="text-sm text-gray-700 leading-relaxed mb-4">
+        {c.description}
+      </p>
 
-      {/* ✅ VIEW IMAGE BUTTON */}
-      {c.imageUrl && (
-        <button
-          onClick={() => window.open(c.imageUrl, "_blank")}
-          style={{
-            background: "#444",
-            color: "#fff",
-            border: "none",
-            padding: "6px 10px",
-            borderRadius: "6px",
-            cursor: "pointer",
-            marginBottom: "10px",
-          }}
-        >
-          👁 View Image
-        </button>
-      )}
-
-      {type === "admin" && (
-        <>
-          <p><b>User:</b> {c.submittedByUsername || "Unknown"}</p>
-          <p><b>Submitted At:</b> {formatDate(c.submittedAt)}</p>
-
-          <p>
-            <b>Pending Days:</b>{" "}
+      {/* Details Grid */}
+      <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+        <div>
+          <p className="text-xs text-gray-500 uppercase tracking-wider">User</p>
+          <p className="font-medium text-gray-800">{c.submittedByUsername}</p>
+        </div>
+        <div>
+          <p className="text-xs text-gray-500 uppercase tracking-wider">Priority</p>
+          <p className={`font-medium ${priorityConfig[c.priority] || "text-gray-700"}`}>
+            {c.priority}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-gray-500 uppercase tracking-wider">Department</p>
+          <p className="font-medium text-gray-800">
+            {c.assignedDepartmentName || "Unassigned"}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-gray-500 uppercase tracking-wider">Days</p>
+          <p className="font-medium text-gray-800">
             {Math.floor(
-              (new Date() - new Date(c.submittedAt)) /
-              (1000 * 60 * 60 * 24)
+              (new Date() - new Date(c.submittedAt)) / (1000 * 60 * 60 * 24)
             )}
           </p>
-        </>
-      )}
+        </div>
+      </div>
 
-      <p>
-        <b>Status:</b>{" "}
-        <span style={{ color: getStatusColor(), fontWeight: "bold" }}>
-          {c.status}
-        </span>
-      </p>
+      {/* Action Buttons */}
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        {c.imageUrl && (
+          <button
+            onClick={() => window.open(c.imageUrl, "_blank")}
+            className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition flex items-center gap-1"
+          >
+            🖼️ View Image
+          </button>
+        )}
 
-      {type === "admin" && (
-        <p>
-          <b>Department:</b>{" "}
-          {c.assignedDepartmentName || "Not Assigned"}
-        </p>
-      )}
-
-      <p>
-        <b>Priority:</b>{" "}
-        <span
-          style={{
-            color: c.priority === "HIGH" ? "red" : "black",
-            fontWeight: c.priority === "HIGH" ? "bold" : "normal",
-          }}
-        >
-          {c.priority}
-        </span>
-      </p>
-
-      {type === "admin" && c.latitude && c.longitude && (
-        <p>
-          <b>Location:</b>{" "}
+        {c.latitude && c.longitude && (
           <a
             href={`https://www.google.com/maps?q=${c.latitude},${c.longitude}`}
             target="_blank"
             rel="noopener noreferrer"
+            className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg transition flex items-center gap-1"
           >
-            📍 Open in Maps
+            📍 View on Map
           </a>
-        </p>
-      )}
+        )}
+      </div>
 
-      {/* ASSIGN */}
-      {type === "admin" &&
-        c.status === "SUBMITTED" &&
-        isUnassigned && (
-          <div style={{ marginTop: "10px" }}>
-            <button onClick={() => setShowAssign(!showAssign)}>
+      {/* Assign Section */}
+      {c.status === "SUBMITTED" && isUnassigned && (
+        <div className="mt-3">
+          {!showAssign ? (
+            <button
+              onClick={() => setShowAssign(true)}
+              className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg transition"
+            >
               Assign Department
             </button>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={selectedDept}
+                onChange={(e) => setSelectedDept(e.target.value)}
+                className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              >
+                <option value="">Select department</option>
+                {departments.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => {
+                  if (!selectedDept) return alert("Please select a department");
+                  onAssign(c.id, selectedDept);
+                  setShowAssign(false);
+                  setSelectedDept("");
+                }}
+                className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg transition"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={() => setShowAssign(false)}
+                className="text-xs text-gray-500 hover:text-gray-700 px-3 py-1.5"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
-            {showAssign && (
-              <div style={{ marginTop: "10px" }}>
-                <select
-                  value={selectedDept}
-                  onChange={(e) => setSelectedDept(e.target.value)}
-                >
-                  <option value="">Select Department</option>
-                  {departments.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.name}
-                    </option>
-                  ))}
-                </select>
-
-                <button
-                  onClick={() => {
-                    if (!selectedDept) {
-                      alert("Select department");
-                      return;
-                    }
-                    onAssign(c.id, selectedDept);
-                    setShowAssign(false);
-                    setSelectedDept("");
-                  }}
-                  style={{ marginLeft: "10px" }}
-                >
-                  Confirm
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-      {/* CLOSE */}
-      {type === "admin" && onClose && (
+      {/* Close Button */}
+      <div className="mt-4 pt-3 border-t border-gray-100">
         <button
           onClick={() => onClose(c.id)}
           disabled={
@@ -163,15 +181,19 @@ function ComplaintCardAdmin({
             c.status === "CLOSED" ||
             c.status === "RESOLVED"
           }
-          style={{ marginTop: "10px" }}
+          className={`text-xs px-4 py-1.5 rounded-lg transition ${
+            c.status === "CLOSED" || c.status === "RESOLVED"
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-gray-600 hover:bg-gray-700 text-white"
+          }`}
         >
           {loadingId === c.id
             ? "Processing..."
-            : c.status === "CLOSED"
+            : c.status === "CLOSED" || c.status === "RESOLVED"
             ? "Closed"
             : "Close Complaint"}
         </button>
-      )}
+      </div>
     </div>
   );
 }
