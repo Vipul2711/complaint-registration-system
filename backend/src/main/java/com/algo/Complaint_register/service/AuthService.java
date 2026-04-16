@@ -15,7 +15,6 @@ public class AuthService {
         this.user_repo= user_repo;
         this.passwordEncoder = passwordEncoder;
     }
-//    register the citizen
 
     public User registerCitizen(UserRegistrationRequest request){
         if(user_repo.findByUsername(request.getUsername()).isPresent() ||user_repo.findByEmail(request.getEmail()).isPresent() ){

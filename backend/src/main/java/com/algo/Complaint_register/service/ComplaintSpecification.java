@@ -15,24 +15,24 @@ public class ComplaintSpecification {
 
     public static Specification<Complaint> filterBy(
             Optional<Status> status,
-            Optional<Priority> priority,           // ✅ NEW
+            Optional<Priority> priority,
             Optional<Long> assignedDepartmentId
     ) {
         return (root, query, criteriaBuilder) -> {
 
             List<Predicate> predicates = new ArrayList<>();
 
-            // ✅ STATUS FILTER
+            //  STATUS FILTER
             status.ifPresent(s ->
                     predicates.add(criteriaBuilder.equal(root.get("status"), s))
             );
 
-            // ✅ PRIORITY FILTER (NEW)
+            // PRIORITY FILTER (NEW)
             priority.ifPresent(p ->
                     predicates.add(criteriaBuilder.equal(root.get("priority"), p))
             );
 
-            // ✅ DEPARTMENT FILTER
+            // DEPARTMENT FILTER
             assignedDepartmentId.ifPresent(depId ->
                     predicates.add(criteriaBuilder.equal(
                             root.get("assignedDepartment").get("id"),
@@ -40,7 +40,7 @@ public class ComplaintSpecification {
                     ))
             );
 
-            // ✅ RETURN COMBINED FILTER
+            //  RETURN COMBINED FILTER
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 

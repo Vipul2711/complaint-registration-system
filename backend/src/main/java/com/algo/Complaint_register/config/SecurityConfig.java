@@ -1,6 +1,7 @@
 package com.algo.Complaint_register.config;
 
 import com.algo.Complaint_register.service.UserDetailsServicesImp;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -9,12 +10,14 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import static org.springframework.security.config.Customizer.withDefaults; // Import for CSRF
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.Arrays;
 import java.util.List;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -25,7 +28,12 @@ public class SecurityConfig {
     private final JwtRequestFilter jwtRequestFilter;
     private final PasswordEncoder passwordEncoder;
 
-    public SecurityConfig(UserDetailsServicesImp userDetailsService, JwtRequestFilter jwtRequestFilter, PasswordEncoder passwordEncoder) {
+    @Value("${cors.allowed-origins:http://localhost:*,https://*.vercel.app}")
+    private String allowedOrigins;
+
+    public SecurityConfig(UserDetailsServicesImp userDetailsService,
+                          JwtRequestFilter jwtRequestFilter,
+                          PasswordEncoder passwordEncoder) {
         this.userDetailsService = userDetailsService;
         this.jwtRequestFilter = jwtRequestFilter;
         this.passwordEncoder = passwordEncoder;
@@ -35,11 +43,9 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder =
                 http.getSharedObject(AuthenticationManagerBuilder.class);
-
         authenticationManagerBuilder
                 .userDetailsService(userDetailsService)
                 .passwordEncoder(passwordEncoder);
-
         return authenticationManagerBuilder.build();
     }
 
@@ -61,22 +67,21 @@ public class SecurityConfig {
 
         return http.build();
     }
+
     @Bean
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
 
+        // Split comma-separated values into a list of allowed origin patterns
+        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        config.setAllowedOriginPatterns(origins);
 
-        config.setAllowedOrigins(List.of(
-                "http://localhost:3000", // React
-                "http://localhost:5173"  // Vite
-        ));
-        config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(java.util.List.of("*"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
         org.springframework.web.cors.UrlBasedCorsConfigurationSource source =
                 new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
-
         source.registerCorsConfiguration("/**", config);
         return source;
     }

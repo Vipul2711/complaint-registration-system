@@ -27,7 +27,6 @@ public class AdminController {
         this.adminService = adminService;
     }
 
-    // === CORRECTED: Returns a safe DTO instead of the User entity ===
     // Create department
     @PostMapping("/createdepartment")
     public ResponseEntity<Department> createDepartment(

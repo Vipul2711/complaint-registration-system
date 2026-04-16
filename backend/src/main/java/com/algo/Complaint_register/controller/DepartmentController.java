@@ -27,8 +27,6 @@ public class DepartmentController {
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir,
-
-            // ✅ NEW PARAMS
             @RequestParam(required = false) Status status,
             @RequestParam(required = false) Priority priority
     ) {
