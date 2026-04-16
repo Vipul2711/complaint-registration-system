@@ -1,6 +1,7 @@
 package com.algo.Complaint_register.service;
 
 import com.algo.Complaint_register.dto.ComplaintAdminViewDto;
+import com.algo.Complaint_register.dto.ComplaintAssignmentRequest;
 import com.algo.Complaint_register.dto.CreateDepartmentRequest;
 import com.algo.Complaint_register.model.*;
 import com.algo.Complaint_register.repository.Complaint_Repo;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+
 @Service
 public class AdminService {
     private final User_Repo userRepository;
@@ -39,7 +41,7 @@ public class AdminService {
         this.emailService= emailService;
     }
 
-    // Create Department
+
     @Transactional
     public Department createDepartment(CreateDepartmentRequest request){
 
@@ -62,10 +64,44 @@ public class AdminService {
         return departmentRepository.save(department);
     }
 
+
+    @Transactional
+    public Complaint assignComplaint(
+            Long complaintId,
+            ComplaintAssignmentRequest request) {
+
+        Complaint complaint = complaintRepo.findById(complaintId)
+                .orElseThrow(() -> new RuntimeException("Complaint not found"));
+        if (complaint.getStatus() != Status.SUBMITTED) {
+            throw new RuntimeException("Only SUBMITTED complaints can be assigned");
+        }
+        if(complaint.getAssignedDepartment() != null){
+            throw new RuntimeException("Complaint already assigned to a department");
+        }
+
+        Department department = departmentRepository.findById(request.getDepartmentId())
+                .orElseThrow(() -> new RuntimeException("Department not found"));
+
+        complaint.setAssignedDepartment(department);
+        complaint.setStatus(Status.ASSIGNED);
+        complaint.setAssignedAt(LocalDateTime.now());
+
+        Complaint updatedComplaint = complaintRepo.save(complaint);
+
+        sendStatusUpdateEmail(updatedComplaint);
+
+        return updatedComplaint;
+
+    }
+
+
     // Get all departments
+
     public List<Department> getAllDepartments(){
         return departmentRepository.findAll();
     }
+
+
     @Transactional
     public void closeComplaintByAdmin(Long complaintId) {
 
@@ -155,6 +191,64 @@ public class AdminService {
         stats.put("departments", departmentRepository.count());
 
         return stats;
+    }
+
+    private void sendStatusUpdateEmail(Complaint complaint) {
+
+        String citizenEmail = complaint.getSubmittedBy().getEmail();
+
+        String locationLink = "https://maps.google.com/?q="
+                + complaint.getLatitude() + "," + complaint.getLongitude();
+
+        emailService.sendEmail(
+                citizenEmail,
+                "Complaint Status Updated",
+                "Dear Citizen,\n\n"
+                        + "Your complaint status has been updated.\n\n"
+                        + "Complaint ID: " + complaint.getId()
+                        + "\nNew Status: " + complaint.getStatus()
+                        + "\nDepartment: "
+                        + (complaint.getAssignedDepartment() != null
+                        ? complaint.getAssignedDepartment().getName()
+                        : "Pending")
+                        + "\n\nLocation:\n" + locationLink
+                        + "\n\nThank you."
+        );
+    }
+
+    public Page<ComplaintAdminViewDto> getComplaintsByDepartment(
+            Long deptId,
+            int page,
+            int size,
+            String sortBy,
+            String sortDir,
+            Status status      // ✅ Use this parameter
+    ) {
+        Sort sort = sortDir.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        // ✅ Build specification with department ID AND status
+        Specification<Complaint> spec = Specification
+                .where(ComplaintSpecification.hasAssignedDepartmentId(deptId))
+                .and(ComplaintSpecification.hasStatus(status));
+
+        Page<Complaint> complaints = complaintRepo.findAll(spec, pageable);
+
+        return complaints.map(c -> new ComplaintAdminViewDto(
+                c.getId(),
+                c.getDescription(),
+                c.getStatus(),
+                c.getSubmittedBy() != null ? c.getSubmittedBy().getUsername() : null,
+                c.getAssignedDepartment() != null ? c.getAssignedDepartment().getName() : null,
+                c.getCreatedAt(),
+                c.getPriority(),
+                c.getLatitude(),
+                c.getLongitude(),
+                c.getImageUrl()
+        ));
     }
 
 }

@@ -7,7 +7,7 @@ import com.algo.Complaint_register.dto.UserRegistrationRequest;
 import com.algo.Complaint_register.model.User;
 import com.algo.Complaint_register.service.AuthService;
 import com.algo.Complaint_register.service.EmailService;
-import com.algo.Complaint_register.service.JwtUtil;
+import com.algo.Complaint_register.util.JwtUtil;
 import com.algo.Complaint_register.service.OtpService;
 import com.algo.Complaint_register.service.UserDetailsServicesImp;
 
@@ -46,9 +46,7 @@ public class AuthController {
         this.emailService = emailService;
     }
 
-    // ===============================
-    // SEND OTP
-    // ===============================
+
     @PostMapping("/send-otp")
     public ResponseEntity<String> sendOtp(@RequestParam String email) {
 
@@ -57,9 +55,7 @@ public class AuthController {
         return ResponseEntity.ok("OTP sent to email");
     }
 
-    // ===============================
-    // VERIFY OTP + REGISTER USER
-    // ===============================
+
     @PostMapping("/verify-otp-register")
     public ResponseEntity<User> verifyOtpAndRegister(
             @Valid @RequestBody RegisterWithOtpRequest request) {
@@ -89,9 +85,7 @@ public class AuthController {
         return ResponseEntity.ok(user);
     }
 
-    // ===============================
-    // LOGIN
-    // ===============================
+
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> createAuthToken(@RequestBody AuthRequest request) {
 

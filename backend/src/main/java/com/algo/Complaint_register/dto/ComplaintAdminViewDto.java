@@ -2,6 +2,7 @@ package com.algo.Complaint_register.dto;
 
 import com.algo.Complaint_register.model.Priority;
 import com.algo.Complaint_register.model.Status;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ public class ComplaintAdminViewDto {
     private Status status;
     private String submittedByUsername;
     private String assignedDepartmentName;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime submittedAt;
     private Priority priority;
 

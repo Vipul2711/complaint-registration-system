@@ -3,7 +3,7 @@ package com.algo.Complaint_register.controller;
 import com.algo.Complaint_register.dto.ComplaintAdminViewDto;
 import com.algo.Complaint_register.model.Priority;
 import com.algo.Complaint_register.model.Status;
-import com.algo.Complaint_register.service.ComplaintService;
+import com.algo.Complaint_register.service.DepartmentService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/department")
 public class DepartmentController {
 
-    private final ComplaintService complaintService;
+    private final DepartmentService departmentService;
 
-    public DepartmentController(ComplaintService complaintService) {
-        this.complaintService = complaintService;
+    public DepartmentController( DepartmentService departmentService) {
+        this.departmentService = departmentService;
     }
 
     @GetMapping("/complaints")
@@ -33,7 +33,7 @@ public class DepartmentController {
             @RequestParam(required = false) Priority priority
     ) {
         return ResponseEntity.ok(
-                complaintService.getDepartmentComplaints(
+                departmentService.getDepartmentComplaints(
                         currentUser, page, size, sortBy, sortDir, status, priority
                 )
         );
@@ -43,7 +43,7 @@ public class DepartmentController {
             @PathVariable Long complaintId,
             @AuthenticationPrincipal UserDetails currentUser){
 
-        complaintService.startComplaintWork(complaintId, currentUser);
+        departmentService.startComplaintWork(complaintId, currentUser);
 
         return ResponseEntity.ok("Work started on complaint");
     }
@@ -53,7 +53,7 @@ public class DepartmentController {
             @PathVariable Long complaintId,
             @AuthenticationPrincipal UserDetails currentUser){
 
-        complaintService.resolveComplaint(complaintId, currentUser);
+        departmentService.resolveComplaint(complaintId, currentUser);
 
         return ResponseEntity.ok("Complaint resolved successfully");
     }

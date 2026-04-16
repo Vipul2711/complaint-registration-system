@@ -1,6 +1,6 @@
 package com.algo.Complaint_register.config;
 
-import com.algo.Complaint_register.service.JwtUtil;
+import com.algo.Complaint_register.util.JwtUtil;
 import com.algo.Complaint_register.service.UserDetailsServicesImp;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -33,26 +33,25 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         final String authorizationHeader = request.getHeader("Authorization");
         String username = null;
         String jwt = null;
-        String roles = null; // Variable to hold roles from the token
+        String roles = null;
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
             username = jwtUtil.extractUsername(jwt);
-            roles = jwtUtil.extractRoles(jwt); // Extract roles from the token
+            roles = jwtUtil.extractRoles(jwt);
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsServicesImp.loadUserByUsername(username);
 
             if (jwtUtil.validateToken(jwt, userDetails)) {
-                // --- THIS IS THE CORRECTED PART ---
-                // Create authorities from the roles string in the token
+
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null,
                         Arrays.stream(roles.split(","))
                                 .map(SimpleGrantedAuthority::new)
                                 .collect(Collectors.toList()));
-                // --- END OF CORRECTION ---
+
 
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);

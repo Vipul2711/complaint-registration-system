@@ -4,29 +4,27 @@ import com.algo.Complaint_register.dto.ComplaintCitizenViewDto;
 import com.algo.Complaint_register.dto.ComplaintRequest;
 import com.algo.Complaint_register.dto.UserStatsDTO;
 import com.algo.Complaint_register.model.Complaint;
-import com.algo.Complaint_register.model.User;
-import com.algo.Complaint_register.service.ComplaintService;
+import com.algo.Complaint_register.service.CitizenService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 
 @RestController
 @RequestMapping("/api/citizen")
 
-public class ComplaintController {
-    private final ComplaintService complaintService;
+public class CitizenController {
+    private final CitizenService  citizenService;
 
-    public ComplaintController(ComplaintService complaintService) {
-        this.complaintService = complaintService;
+    public CitizenController(CitizenService citizenService) {
+        this.citizenService = citizenService;
     }
     @PostMapping("/submit_complaints")
     public ResponseEntity<Complaint> complaintSubmit(@ModelAttribute ComplaintRequest request,
                                                      @AuthenticationPrincipal UserDetails curruser) {
-        Complaint createComplaint = complaintService.saveComplaint(request,curruser);
+        Complaint createComplaint = citizenService.saveComplaint(request,curruser);
 
         return new ResponseEntity<>(createComplaint, HttpStatus.CREATED);
     }
@@ -41,7 +39,7 @@ public class ComplaintController {
     ) {
 
         Page<ComplaintCitizenViewDto> myComplaints =
-                complaintService.getMyComplaints(
+                citizenService.getMyComplaints(
                         currentUser, page, size, sortBy, sortDir, status);
 
         return ResponseEntity.ok(myComplaints);
@@ -51,7 +49,7 @@ public class ComplaintController {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails currentUser) {
 
-        complaintService.deleteComplaint(id, currentUser);
+        citizenService.deleteComplaint(id, currentUser);
         return ResponseEntity.ok("Complaint closed successfully");
     }
 
@@ -61,7 +59,7 @@ public class ComplaintController {
 
         String username = currentUser.getUsername();
 
-        UserStatsDTO stats = complaintService.getUserStats(username);
+        UserStatsDTO stats = citizenService.getUserStats(username);
 
         return ResponseEntity.ok(stats);
     }

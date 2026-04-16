@@ -1,4 +1,4 @@
-package com.algo.Complaint_register.service;
+package com.algo.Complaint_register.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -49,10 +49,10 @@ public class JwtUtil {
 
     private Claims extractAllClaims(String token) {
         // Use the modern parserBuilder()
-        return Jwts.parser() // <-- Changed from parserBuilder() to parser()
-                .verifyWith(secretKey) // <-- Changed from setSigningKey() to verifyWith()
+        return Jwts.parser()
+                .verifyWith(secretKey)
                 .build()
-                .parseSignedClaims(token) // <-- Changed from parseClaimsJws() to parseSignedClaims()
+                .parseSignedClaims(token)
                 .getPayload();
     }
 
@@ -79,7 +79,7 @@ public class JwtUtil {
 
     private String createToken(Map<String, Object> claims, String subject) {
         return builder()
-                .setClaims(claims) // This will now include the "roles" claim
+                .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours

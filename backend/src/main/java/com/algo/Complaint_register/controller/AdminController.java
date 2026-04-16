@@ -9,12 +9,10 @@ import com.algo.Complaint_register.model.Department;
 import com.algo.Complaint_register.model.Priority;
 import com.algo.Complaint_register.model.Status;
 import com.algo.Complaint_register.service.AdminService;
-import com.algo.Complaint_register.service.ComplaintService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,10 +22,8 @@ import java.util.Optional;
 public class AdminController {
 
     private final AdminService adminService;
-    private final ComplaintService complaintService;
 
-    public AdminController(AdminService adminService, ComplaintService complaintService) {
-        this.complaintService = complaintService;
+    public AdminController(AdminService adminService) {
         this.adminService = adminService;
     }
 
@@ -42,7 +38,7 @@ public class AdminController {
         return ResponseEntity.ok(department);
     }
 
-    // === This endpoint was already correct, no changes needed ===
+
     @GetMapping("/complaints")
     public ResponseEntity<Page<ComplaintAdminViewDto>> getAllComplaints(
             @RequestParam(required = false) Optional<Status> status,
@@ -59,15 +55,13 @@ public class AdminController {
         return ResponseEntity.ok(complaints);
     }
 
-    // === CORRECTED: Returns a safe DTO instead of the Complaint_Entity ===
     @PutMapping("/assign/{complaintId}")
     public ResponseEntity<ComplaintAssignmentResponseDto> assignComplaint(
             @PathVariable Long complaintId,
             @RequestBody ComplaintAssignmentRequest assignmentRequest) {
 
-        Complaint assignedComplaint = complaintService.assignComplaint(complaintId, assignmentRequest);
+        Complaint assignedComplaint = adminService.assignComplaint(complaintId, assignmentRequest);
 
-        // Map the full Complaint entity to the safe DTO
         ComplaintAssignmentResponseDto responseDto = new ComplaintAssignmentResponseDto(
                 assignedComplaint.getId(),
                 assignedComplaint.getStatus(),
@@ -84,21 +78,6 @@ public class AdminController {
 
         return ResponseEntity.ok("Complaint closed by admin");
     }
-//    @PutMapping("/start_work/{id}")
-//    public ResponseEntity<String> startWork(@PathVariable Long id){
-//
-//        complaintService.startComplaintWork(id);
-//
-//        return ResponseEntity.ok("Complaint work started");
-//    }
-//
-//    @PutMapping("/resolve_complaint/{id}")
-//    public ResponseEntity<String> resolveComplaint(@PathVariable Long id){
-//
-//        complaintService.resolveComplaint(id);
-//
-//        return ResponseEntity.ok("Complaint resolved successfully");
-//    }
 
     @GetMapping("/departments")
     public ResponseEntity<List<Department>> getAllDepartments() {
@@ -110,10 +89,11 @@ public class AdminController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDir
+            @RequestParam(defaultValue = "desc") String sortDir,
+            @RequestParam(required = false) Status status
     ) {
         return ResponseEntity.ok(
-                complaintService.getComplaintsByDepartment(deptId, page, size, sortBy, sortDir)
+                adminService.getComplaintsByDepartment(deptId, page, size, sortBy, sortDir,status)
         );
     }
 

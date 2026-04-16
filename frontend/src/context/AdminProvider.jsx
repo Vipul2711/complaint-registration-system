@@ -1,4 +1,4 @@
-import { useReducer } from "react";
+import { useCallback, useReducer } from "react";
 import { AdminContext } from "./AdminContext";
 import { adminReducer, initialState } from "../reducer/adminReducer";
 import { useAuth } from "./useAuth";
@@ -14,39 +14,41 @@ function AdminProvider({ children }) {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
   };
-const fetchComplaints = async ({
+const fetchComplaints = useCallback ( async({
   page = 0,
   sortBy = "createdAt",
   sortDir = "desc",
-  status = "ALL",
-  priority = "ALL",
-  deptId = null, // ✅ ADD THIS
+  status = null,
+  priority = null,
+  deptId = null,
 }) => {
   dispatch({ type: "SET_LOADING" });
 
   try {
     let url = "";
 
-    // ✅ SWITCH API BASED ON deptId
+    // Select API based on department
     if (deptId) {
       url = `${API}/complaints/by-department/${deptId}?page=${page}&size=5&sortBy=${sortBy}&sortDir=${sortDir}`;
     } else {
       url = `${API}/complaints?page=${page}&size=5&sortBy=${sortBy}&sortDir=${sortDir}`;
     }
 
-    // ✅ STATUS FILTER
-    if (status !== "ALL") {
+    // Append filters only if valid
+    if (status && status !== "ALL") {
       url += `&status=${status}`;
     }
 
-    // ✅ PRIORITY FILTER
-    if (priority !== "ALL") {
+    if (priority && priority !== "ALL") {
       url += `&priority=${priority}`;
     }
 
     const res = await fetch(url, { headers });
 
-    if (!res.ok) throw new Error("Failed");
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(errorText || "Failed");
+    }
 
     const data = await res.json();
 
@@ -55,9 +57,10 @@ const fetchComplaints = async ({
       payload: data,
     });
   } catch (err) {
+    console.error("Fetch Complaints Error:", err.message);
     dispatch({ type: "SET_ERROR", payload: err.message });
   }
-};
+},[token]);
 
   // ✅ FETCH DEPARTMENTS
   const fetchDepartments = async () => {

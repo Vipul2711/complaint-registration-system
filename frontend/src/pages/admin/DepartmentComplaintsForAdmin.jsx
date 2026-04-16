@@ -15,7 +15,7 @@ function DepartmentComplaintsForAdmin() {
   const [page, setPage] = useState(0);
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortDir, setSortDir] = useState("desc");
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState(null);
 
   useEffect(() => {
     fetchComplaints({
@@ -91,10 +91,10 @@ function DepartmentComplaintsForAdmin() {
                 Status
               </label>
               <select
-                value={status}
+                value={status || null}
                 onChange={(e) => {
                   setPage(0);
-                  setStatus(e.target.value);
+                  setStatus(e.target.value || null);
                 }}
                 className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition cursor-pointer"
               >

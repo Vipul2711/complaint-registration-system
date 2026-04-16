@@ -43,5 +43,19 @@ public class ComplaintSpecification {
             // ✅ RETURN COMBINED FILTER
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
+
+    }
+    public static Specification<Complaint> hasAssignedDepartmentId(Long deptId) {
+        return (root, query, cb) -> {
+            if (deptId == null) return cb.conjunction();
+            return cb.equal(root.get("assignedDepartment").get("id"), deptId);
+        };
+    }
+
+    public static Specification<Complaint> hasStatus(Status status) {
+        return (root, query, cb) -> {
+            if (status == null) return cb.conjunction();
+            return cb.equal(root.get("status"), status);
+        };
     }
 }

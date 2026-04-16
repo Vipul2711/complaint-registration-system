@@ -60,7 +60,7 @@ public class Complaint {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // === ADD THIS FIELD ===
+
     private LocalDateTime assignedAt;
 
     private LocalDateTime resolvedAt;

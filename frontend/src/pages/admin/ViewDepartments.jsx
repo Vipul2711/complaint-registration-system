@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAdmin } from "../../context/useAdmin";
 import { useNavigate } from "react-router-dom";
 
@@ -9,19 +9,31 @@ function ViewDepartments() {
 
   useEffect(() => {
     fetchDepartments();
-  }, []);
+  }, [fetchDepartments]);
 
-  const filtered = departments.filter((d) =>
-    d.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // Ensure departments is always an array
+  const safeDepartments = Array.isArray(departments) ? departments : [];
+
+  // Filter departments safely
+  const filtered = useMemo(() => {
+    const query = search.toLowerCase();
+    return safeDepartments.filter((d) =>
+      (d?.name || "").toLowerCase().includes(query)
+    );
+  }, [safeDepartments, search]);
 
   return (
     <div className="p-6 md:p-8 bg-gray-50 min-h-screen">
       <div className="max-w-6xl mx-auto">
+        
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-extrabold text-gray-900">Departments</h1>
-          <p className="text-gray-500 mt-1">Manage and view all government departments.</p>
+          <h1 className="text-3xl font-extrabold text-gray-900">
+            Departments
+          </h1>
+          <p className="text-gray-500 mt-1">
+            Manage and view all government departments.
+          </p>
         </div>
 
         {/* Search Bar */}
@@ -56,6 +68,7 @@ function ViewDepartments() {
                 </th>
               </tr>
             </thead>
+
             <tbody className="divide-y divide-gray-100">
               {filtered.length > 0 ? (
                 filtered.map((d) => (
@@ -101,6 +114,7 @@ function ViewDepartments() {
             </tbody>
           </table>
         </div>
+
       </div>
     </div>
   );

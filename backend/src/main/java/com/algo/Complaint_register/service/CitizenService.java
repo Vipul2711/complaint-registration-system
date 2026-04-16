@@ -1,42 +1,46 @@
 package com.algo.Complaint_register.service;
 
-import com.algo.Complaint_register.dto.*;
-import com.algo.Complaint_register.model.*;
+import com.algo.Complaint_register.dto.ComplaintCitizenViewDto;
+import com.algo.Complaint_register.dto.ComplaintRequest;
+import com.algo.Complaint_register.dto.UserStatsDTO;
+import com.algo.Complaint_register.model.Complaint;
+import com.algo.Complaint_register.model.Status;
+import com.algo.Complaint_register.model.User;
 import com.algo.Complaint_register.repository.Complaint_Repo;
 import com.algo.Complaint_register.repository.User_Repo;
-import com.algo.Complaint_register.repository.department_Repo;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
+
 
 @Service
-public class ComplaintService {
+public class CitizenService {
+
     private static final long MAX_SIZE = 5 * 1024 * 1024; // 5MB
     private final Complaint_Repo complaintRepo;
     private final User_Repo userRepo;
-    private final department_Repo departmentRepo;
     private final EmailService emailService;
     private final CloudinaryService  cloudinaryService;
 
-    public ComplaintService(Complaint_Repo complaintRepo,
+    public CitizenService(Complaint_Repo complaintRepo,
                             User_Repo userRepo,
-                            department_Repo departmentRepo ,EmailService emailService, CloudinaryService cloudinaryService) {
+                            EmailService emailService, CloudinaryService cloudinaryService) {
         this.complaintRepo = complaintRepo;
         this.userRepo = userRepo;
-        this.departmentRepo = departmentRepo;
         this.emailService = emailService;
-         this.cloudinaryService = cloudinaryService;
+        this.cloudinaryService = cloudinaryService;
     }
 
-    // ===============================
-    // CREATE COMPLAINT (USER)
-    // ===============================
+
+
     @Transactional
     public Complaint saveComplaint(ComplaintRequest request, UserDetails currentUser) {
 
@@ -66,6 +70,7 @@ public class ComplaintService {
         complaint.setLongitude(request.getLongitude());
         complaint.setStatus(Status.SUBMITTED);
         complaint.setSubmittedBy(user);
+
         complaint.setCreatedAt(LocalDateTime.now());
         complaint.setImageUrl(imageUrl);
 
@@ -84,9 +89,7 @@ public class ComplaintService {
 
         return savedComplaint;
     }
-    // ===============================
-    // VIEW MY COMPLAINTS (USER)
-    // ===============================
+
     public Page<ComplaintCitizenViewDto> getMyComplaints(
             UserDetails currentUser,
             int page,
@@ -140,38 +143,6 @@ public class ComplaintService {
     }
 
 
-    // ===============================
-    // ASSIGN COMPLAINT (ADMIN)
-    // ===============================
-    @Transactional
-    public Complaint assignComplaint(
-            Long complaintId,
-            ComplaintAssignmentRequest request) {
-
-        Complaint complaint = complaintRepo.findById(complaintId)
-                .orElseThrow(() -> new RuntimeException("Complaint not found"));
-        if (complaint.getStatus() != Status.SUBMITTED) {
-            throw new RuntimeException("Only SUBMITTED complaints can be assigned");
-        }
-        if(complaint.getAssignedDepartment() != null){
-            throw new RuntimeException("Complaint already assigned to a department");
-        }
-
-        Department department = departmentRepo.findById(request.getDepartmentId())
-                .orElseThrow(() -> new RuntimeException("Department not found"));
-
-        complaint.setAssignedDepartment(department);
-        complaint.setStatus(Status.ASSIGNED);
-        complaint.setAssignedAt(LocalDateTime.now());
-
-        Complaint updatedComplaint = complaintRepo.save(complaint);
-
-        sendStatusUpdateEmail(updatedComplaint);
-
-        return updatedComplaint;
-
-    }
-
     @Transactional
     public void deleteComplaint(Long complaintId, UserDetails currentUser) {
 
@@ -213,7 +184,6 @@ public class ComplaintService {
         );
     }
 
-
     private void sendStatusUpdateEmail(Complaint complaint) {
 
         String citizenEmail = complaint.getSubmittedBy().getEmail();
@@ -236,130 +206,6 @@ public class ComplaintService {
                         + "\n\nThank you."
         );
     }
-    @Transactional
-    public Complaint startComplaintWork(Long complaintId, UserDetails currentUser) {
-
-        Complaint complaint = complaintRepo.findById(complaintId)
-                .orElseThrow(() -> new RuntimeException("Complaint not found"));
-
-        String loggedUsername = currentUser.getUsername();
-
-        String complaintDepartmentUser =
-                complaint.getAssignedDepartment()
-                        .getUser()
-                        .getUsername();
-
-        if (!complaintDepartmentUser.equals(loggedUsername)) {
-            throw new RuntimeException("You are not authorized to work on this complaint");
-        }
-
-        complaint.setStatus(Status.IN_PROGRESS);
-
-        Complaint updatedComplaint = complaintRepo.save(complaint);
-
-        sendStatusUpdateEmail(updatedComplaint);
-
-        return updatedComplaint;
-    }
-    @Transactional
-    public Complaint resolveComplaint(Long complaintId, UserDetails currentUser) {
-
-        Complaint complaint = complaintRepo.findById(complaintId)
-                .orElseThrow(() -> new RuntimeException("Complaint not found"));
-
-        String loggedUsername = currentUser.getUsername();
-
-        String complaintDepartmentUser =
-                complaint.getAssignedDepartment()
-                        .getUser()
-                        .getUsername();
-
-        if (!complaintDepartmentUser.equals(loggedUsername)) {
-            throw new RuntimeException("You are not authorized to resolve this complaint");
-        }
-
-        complaint.setStatus(Status.RESOLVED);
-        complaint.setResolvedAt(LocalDateTime.now());
-
-        Complaint updatedComplaint = complaintRepo.save(complaint);
-
-        sendStatusUpdateEmail(updatedComplaint);
-
-        return updatedComplaint;
-    }
-    public Page<ComplaintAdminViewDto> getDepartmentComplaints(
-            UserDetails currentUser,
-            int page,
-            int size,
-            String sortBy,
-            String sortDir,
-            Status status,
-            Priority priority
-    ) {
-
-        Department department = departmentRepo
-                .findByUserUsername(currentUser.getUsername())
-                .orElseThrow(() -> new RuntimeException("Department not found"));
-
-        Sort sort = sortDir.equalsIgnoreCase("asc")
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        // ✅ CALL FILTERED REPO METHOD
-        Page<Complaint> complaints =
-                complaintRepo.findByDepartmentWithFilters(
-                        department.getId(),
-                        status,
-                        priority,
-                        pageable
-                );
-
-        return complaints.map(complaint -> new ComplaintAdminViewDto(
-                complaint.getId(),
-                complaint.getDescription(),
-                complaint.getStatus(),
-                complaint.getSubmittedBy().getUsername(),
-                complaint.getAssignedDepartment().getName(),
-                complaint.getCreatedAt(),
-                complaint.getPriority(),
-                complaint.getLatitude(),
-                complaint.getLongitude(),
-                complaint.getImageUrl()
-        ));
-    }
-    public Page<ComplaintAdminViewDto> getComplaintsByDepartment(
-            Long deptId,
-            int page,
-            int size,
-            String sortBy,
-            String sortDir
-    ) {
-
-        Sort sort = sortDir.equalsIgnoreCase("asc")
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        Page<Complaint> complaints =
-                complaintRepo.findByAssignedDepartmentId(deptId, pageable);
-
-        return complaints.map(c -> new ComplaintAdminViewDto(
-                c.getId(),
-                c.getDescription(),
-                c.getStatus(),
-                c.getSubmittedBy() != null ? c.getSubmittedBy().getUsername() : null,
-                c.getAssignedDepartment() != null ? c.getAssignedDepartment().getName() : null,
-                c.getCreatedAt(),
-                c.getPriority(),
-                c.getLatitude(),   // ✅ ADD
-                c.getLongitude(),
-                c.getImageUrl()
-
-        ));
-    }
 
     public UserStatsDTO getUserStats(String username) {
 
@@ -380,4 +226,6 @@ public class ComplaintService {
                 closed
         );
     }
+
+
 }

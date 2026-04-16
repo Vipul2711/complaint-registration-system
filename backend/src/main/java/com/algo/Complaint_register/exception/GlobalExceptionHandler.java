@@ -10,14 +10,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@RestControllerAdvice   // ✅ IMPORTANT (instead of @ControllerAdvice)
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    // ===============================
     // Resource Not Found
-    // ===============================
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<?> resourceNotFoundHandler(ResourceNotFoundException ex) {
 
@@ -26,10 +24,7 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
-
-    // ===============================
     // Validation Errors
-    // ===============================
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> validationErrorHandling(MethodArgumentNotValidException ex) {
 
@@ -44,9 +39,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-    // ===============================
     // OTP / Business Logic Errors
-    // ===============================
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<?> handleRuntimeException(RuntimeException ex) {
 
@@ -56,9 +49,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST); // ✅ 400 instead of 500
     }
 
-    // ===============================
     // Catch All (Fallback)
-    // ===============================
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGlobalException(Exception ex) {
 
