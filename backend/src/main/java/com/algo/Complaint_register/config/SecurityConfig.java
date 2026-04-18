@@ -28,8 +28,8 @@ public class SecurityConfig {
     private final JwtRequestFilter jwtRequestFilter;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${cors.allowed-origins:http://localhost:*,https://*.vercel.app}")
-    private String allowedOrigins;
+//    @Value("${cors.allowed-origins:http://localhost:*,https://*.vercel.app}")
+//    private String allowedOrigins;
 
     public SecurityConfig(UserDetailsServicesImp userDetailsService,
                           JwtRequestFilter jwtRequestFilter,
@@ -73,8 +73,12 @@ public class SecurityConfig {
         org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
 
         // Split comma-separated values into a list of allowed origin patterns
-        List<String> origins = Arrays.asList(allowedOrigins.split(","));
-        config.setAllowedOriginPatterns(origins);
+
+        config.setAllowedOriginPatterns(List.of(
+                "http://localhost:5173",       // Your local frontend origin
+                "http://127.0.0.1:5173",
+                "https://*.vercel.app"          // Allow all Vercel preview/production URLs
+        ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
