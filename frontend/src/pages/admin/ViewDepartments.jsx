@@ -11,10 +11,8 @@ function ViewDepartments() {
     fetchDepartments();
   }, [fetchDepartments]);
 
-  // Ensure departments is always an array
   const safeDepartments = Array.isArray(departments) ? departments : [];
 
-  // Filter departments safely
   const filtered = useMemo(() => {
     const query = search.toLowerCase();
     return safeDepartments.filter((d) =>
@@ -36,7 +34,6 @@ function ViewDepartments() {
           </p>
         </div>
 
-        {/* Search Bar */}
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
           <div className="relative flex-1 max-w-md">
             <input
@@ -52,7 +49,6 @@ function ViewDepartments() {
           </span>
         </div>
 
-        {/* Departments Table */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">

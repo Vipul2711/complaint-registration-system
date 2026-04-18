@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import DepartmentComplaintCard from "../../component/ComplaintCardDepartment";
 import { useDepartment } from "../../context/useDepartment";
 import Toast from "../../component/Toast";
+import { API_BASE_URL } from "../../api"; // ✅ Import centralized API base URL
 
 function DepartmentComplaintsForDept() {
   const { state, dispatch, fetchComplaints } = useDepartment();
@@ -30,7 +31,7 @@ function DepartmentComplaintsForDept() {
     setLoadingId(id);
     try {
       const res = await fetch(
-        `http://localhost:8080/api/department/start_work/${id}`,
+        `${API_BASE_URL}/api/department/start_work/${id}`, 
         {
           method: "PUT",
           headers: { Authorization: `Bearer ${token}` },
@@ -55,7 +56,7 @@ function DepartmentComplaintsForDept() {
     setLoadingId(id);
     try {
       const res = await fetch(
-        `http://localhost:8080/api/department/resolve/${id}`,
+        `${API_BASE_URL}/api/department/resolve/${id}`, 
         {
           method: "PUT",
           headers: { Authorization: `Bearer ${token}` },
@@ -79,7 +80,6 @@ function DepartmentComplaintsForDept() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
-        {/* Toast */}
         {toast && (
           <Toast
             message={toast.message}
@@ -88,7 +88,6 @@ function DepartmentComplaintsForDept() {
           />
         )}
 
-        {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
             <h1 className="text-3xl font-extrabold text-gray-900">
@@ -99,7 +98,6 @@ function DepartmentComplaintsForDept() {
             </p>
           </div>
 
-          {/* Filters */}
           <div className="flex flex-wrap gap-3">
             <select
               value={statusFilter}
@@ -149,7 +147,6 @@ function DepartmentComplaintsForDept() {
           </div>
         </div>
 
-        {/* Content */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-5">
           {loading ? (
             <div className="flex justify-center items-center py-20">
@@ -178,7 +175,6 @@ function DepartmentComplaintsForDept() {
             </div>
           )}
 
-          {/* Pagination */}
           {!loading && complaints.length > 0 && (
             <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
               <button

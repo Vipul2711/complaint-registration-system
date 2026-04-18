@@ -21,7 +21,7 @@ export const adminReducer = (state, action) => {
     loading: false,
     complaints: action.payload.content,
     totalPages: action.payload.totalPages,
-    totalElements: action.payload.totalElements, // ✅ ADD THIS
+    totalElements: action.payload.totalElements, 
   };
 
     case "SET_DEPARTMENTS":

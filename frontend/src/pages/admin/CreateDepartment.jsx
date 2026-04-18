@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../../context/useAuth";
 import Toast from "../../component/Toast";
+import { API_BASE_URL } from "../../api"; 
 
 function CreateDepartment() {
   const [form, setForm] = useState({
@@ -32,7 +33,7 @@ function CreateDepartment() {
 
     try {
       const res = await fetch(
-        "http://localhost:8080/api/admin/createdepartment",
+        `${API_BASE_URL}/api/admin/createdepartment`, // ✅ Dynamic base URL
         {
           method: "POST",
           headers: {
@@ -63,7 +64,6 @@ function CreateDepartment() {
   return (
     <div className="p-6 md:p-8 bg-gray-50 min-h-screen">
       <div className="max-w-2xl mx-auto">
-        {/* Toast */}
         {toast && (
           <Toast
             message={toast.message}
@@ -72,7 +72,6 @@ function CreateDepartment() {
           />
         )}
 
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-extrabold text-gray-900">
             Create Department
@@ -82,10 +81,8 @@ function CreateDepartment() {
           </p>
         </div>
 
-        {/* Form Card */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Department Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Department Name
@@ -100,7 +97,6 @@ function CreateDepartment() {
               />
             </div>
 
-            {/* Username */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Username
@@ -115,7 +111,6 @@ function CreateDepartment() {
               />
             </div>
 
-            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Email Address
@@ -131,7 +126,6 @@ function CreateDepartment() {
               />
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Password
@@ -147,7 +141,6 @@ function CreateDepartment() {
               />
             </div>
 
-            {/* Submit Button */}
             <div className="pt-2">
               <button
                 type="submit"

@@ -2,8 +2,9 @@ import { useCallback, useReducer } from "react";
 import { AdminContext } from "./AdminContext";
 import { adminReducer, initialState } from "../reducer/adminReducer";
 import { useAuth } from "./useAuth";
+import { API_BASE_URL } from "../api"; 
 
-const API = "http://localhost:8080/api/admin";
+const API = `${API_BASE_URL}/api/admin`;
 
 function AdminProvider({ children }) {
   const [state, dispatch] = useReducer(adminReducer, initialState);
@@ -14,55 +15,56 @@ function AdminProvider({ children }) {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
   };
-const fetchComplaints = useCallback ( async({
-  page = 0,
-  sortBy = "createdAt",
-  sortDir = "desc",
-  status = null,
-  priority = null,
-  deptId = null,
-}) => {
-  dispatch({ type: "SET_LOADING" });
 
-  try {
-    let url = "";
+  const fetchComplaints = useCallback(
+    async ({
+      page = 0,
+      sortBy = "createdAt",
+      sortDir = "desc",
+      status = null,
+      priority = null,
+      deptId = null,
+    }) => {
+      dispatch({ type: "SET_LOADING" });
 
-    // Select API based on department
-    if (deptId) {
-      url = `${API}/complaints/by-department/${deptId}?page=${page}&size=5&sortBy=${sortBy}&sortDir=${sortDir}`;
-    } else {
-      url = `${API}/complaints?page=${page}&size=5&sortBy=${sortBy}&sortDir=${sortDir}`;
-    }
+      try {
+        let url = "";
 
-    // Append filters only if valid
-    if (status && status !== "ALL") {
-      url += `&status=${status}`;
-    }
+        if (deptId) {
+          url = `${API}/complaints/by-department/${deptId}?page=${page}&size=5&sortBy=${sortBy}&sortDir=${sortDir}`;
+        } else {
+          url = `${API}/complaints?page=${page}&size=5&sortBy=${sortBy}&sortDir=${sortDir}`;
+        }
 
-    if (priority && priority !== "ALL") {
-      url += `&priority=${priority}`;
-    }
+        if (status && status !== "ALL") {
+          url += `&status=${status}`;
+        }
 
-    const res = await fetch(url, { headers });
+        if (priority && priority !== "ALL") {
+          url += `&priority=${priority}`;
+        }
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(errorText || "Failed");
-    }
+        const res = await fetch(url, { headers });
 
-    const data = await res.json();
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(errorText || "Failed");
+        }
 
-    dispatch({
-      type: "SET_COMPLAINTS",
-      payload: data,
-    });
-  } catch (err) {
-    console.error("Fetch Complaints Error:", err.message);
-    dispatch({ type: "SET_ERROR", payload: err.message });
-  }
-},[token]);
+        const data = await res.json();
 
-  // ✅ FETCH DEPARTMENTS
+        dispatch({
+          type: "SET_COMPLAINTS",
+          payload: data,
+        });
+      } catch (err) {
+        console.error("Fetch Complaints Error:", err.message);
+        dispatch({ type: "SET_ERROR", payload: err.message });
+      }
+    },
+    [token]
+  );
+
   const fetchDepartments = async () => {
     try {
       const res = await fetch(`${API}/departments`, { headers });
@@ -74,7 +76,6 @@ const fetchComplaints = useCallback ( async({
     }
   };
 
-  // ✅ DASHBOARD
   const fetchStats = async () => {
     try {
       const res = await fetch(`${API}/dashboard`, { headers });
@@ -86,7 +87,6 @@ const fetchComplaints = useCallback ( async({
     }
   };
 
-  // ✅ ASSIGN
   const assignComplaint = async (id, deptId) => {
     const res = await fetch(`${API}/assign/${id}`, {
       method: "PUT",
@@ -97,7 +97,6 @@ const fetchComplaints = useCallback ( async({
     if (!res.ok) throw new Error("Assign failed");
   };
 
-  // ✅ CLOSE
   const closeComplaint = async (id) => {
     const res = await fetch(`${API}/close_complaint/${id}`, {
       method: "PUT",

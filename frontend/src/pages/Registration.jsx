@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
+import { API_BASE_URL } from "../api";
 
 function Registration() {
   const [step, setStep] = useState(1);
@@ -23,7 +24,7 @@ function Registration() {
     setError("");
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:8080/api/auth/send-otp?email=${email}`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/send-otp?email=${email}`, {
         method: "POST",
       });
       if (!res.ok) throw new Error(await res.text());
@@ -46,7 +47,7 @@ function Registration() {
     setError("");
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:8080/api/auth/verify-otp-register", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/verify-otp-register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password, otp }),

@@ -34,7 +34,6 @@ export default function App() {
   return (
     <>
     
-      {/* ✅ CORRECT */}
       <Toaster position="top-right" reverseOrder={false} />
 
       <BrowserRouter>

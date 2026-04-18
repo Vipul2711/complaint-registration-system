@@ -71,7 +71,6 @@ const DepartmentDash = () => {
           <p className="text-gray-500 mt-1">Overview of complaints assigned to your department.</p>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
           {cards.map((card) => (
             <div
@@ -87,7 +86,6 @@ const DepartmentDash = () => {
           ))}
         </div>
 
-        {/* Recent Complaints */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">Recent Complaints</h2>

@@ -14,7 +14,7 @@ export const initialState = {
 
   loading: false,
 
-  // ✅ Toast
+  
   toast: null,
 };
 
@@ -57,7 +57,7 @@ export const departmentReducer = (state, action) => {
         page: 0,
       };
 
-    // ✅ TOAST
+    
     case "SHOW_TOAST":
       return {
         ...state,

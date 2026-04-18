@@ -4,6 +4,7 @@ import LocationPicker from "../../component/ComplaintMap";
 import toast from "react-hot-toast";
 import { useUser } from "../../context/UserContext";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../../api"; 
 
 function CreateComplaint() {
   const [description, setDescription] = useState("");
@@ -82,7 +83,7 @@ function CreateComplaint() {
       formData.append("longitude", longitude);
       formData.append("image", image);
 
-      const res = await fetch("http://localhost:8080/api/citizen/submit_complaints", {
+      const res = await fetch(`${API_BASE_URL}/api/citizen/submit_complaints`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -114,7 +115,6 @@ function CreateComplaint() {
           onSubmit={handleSubmit}
           className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 md:p-8 space-y-8"
         >
-          {/* Description */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               📝 Description
@@ -129,7 +129,6 @@ function CreateComplaint() {
             />
           </div>
 
-          {/* Location */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
@@ -187,7 +186,6 @@ function CreateComplaint() {
             </div>
           </div>
 
-          {/* Image Upload */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               📷 Evidence Image
@@ -215,7 +213,6 @@ function CreateComplaint() {
             )}
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}

@@ -1,12 +1,14 @@
 import { useReducer } from "react";
 import { DepartmentContext } from "./DepartmentContext";
 import { departmentReducer, initialState } from "../reducer/departmentReducer";
+import { API_BASE_URL } from "../api"; 
+
+const API = `${API_BASE_URL}/api/department`; 
 
 export const DepartmentProvider = ({ children }) => {
   const [state, dispatch] = useReducer(departmentReducer, initialState);
   const token = localStorage.getItem("token");
 
-  // ✅ PAGINATED FETCH
   const fetchComplaints = async () => {
     dispatch({ type: "SET_LOADING" });
 
@@ -20,7 +22,7 @@ export const DepartmentProvider = ({ children }) => {
           : `&priority=${state.priorityFilter}`;
 
       const res = await fetch(
-        `http://localhost:8080/api/department/complaints?page=${state.page}&size=5&sortBy=${state.sortBy}&sortDir=${state.sortDir}${statusParam}${priorityParam}`,
+        `${API}/complaints?page=${state.page}&size=5&sortBy=${state.sortBy}&sortDir=${state.sortDir}${statusParam}${priorityParam}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -37,11 +39,10 @@ export const DepartmentProvider = ({ children }) => {
     }
   };
 
-  // ✅ FULL DATA FETCH
   const fetchAllComplaints = async () => {
     try {
       const firstRes = await fetch(
-        "http://localhost:8080/api/department/complaints?page=0&size=50",
+        `${API}/complaints?page=0&size=50`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -56,7 +57,7 @@ export const DepartmentProvider = ({ children }) => {
       for (let i = 1; i < totalPages; i++) {
         promises.push(
           fetch(
-            `http://localhost:8080/api/department/complaints?page=${i}&size=50`,
+            `${API}/complaints?page=${i}&size=50`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -70,7 +71,7 @@ export const DepartmentProvider = ({ children }) => {
         all = [...all, ...r.content];
       });
       console.log("🔥 First Page:", firstData);
-console.log("🔥 Combined Data:", all);
+      console.log("🔥 Combined Data:", all);
 
       dispatch({ type: "SET_ALL_DATA", payload: all });
     } catch (err) {

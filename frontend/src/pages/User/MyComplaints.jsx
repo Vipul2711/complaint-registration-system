@@ -3,6 +3,7 @@ import { useUser } from "../../context/UserContext";
 import { useAuth } from "../../context/useAuth";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "../../api";
 
 function MyComplaints() {
   const {
@@ -27,7 +28,7 @@ function MyComplaints() {
     if (!window.confirm("Are you sure you want to delete this complaint?")) return;
     setLoadingId(id);
     try {
-      const res = await fetch(`http://localhost:8080/api/citizen/delete_complaint/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/citizen/delete_complaint/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
