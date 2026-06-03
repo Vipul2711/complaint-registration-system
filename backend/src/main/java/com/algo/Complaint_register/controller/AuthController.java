@@ -11,6 +11,7 @@ import com.algo.Complaint_register.util.JwtUtil;
 import com.algo.Complaint_register.service.OtpService;
 import com.algo.Complaint_register.service.UserDetailsServicesImp;
 
+import com.algo.Complaint_register.util.RedisUtil;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,7 @@ public class AuthController {
     private final UserDetailsServicesImp userDetailsServices;
     private final OtpService otpService;
     private final EmailService emailService;
+    private final RedisUtil redisUtil;
 
     public AuthController(
             AuthService authService,
@@ -36,7 +38,8 @@ public class AuthController {
             AuthenticationManager authenticationManager,
             UserDetailsServicesImp userDetailsServices,
             OtpService otpService,
-            EmailService emailService) {
+            EmailService emailService,
+    RedisUtil redisUtil) {
 
         this.authService = authService;
         this.jwtUtil = jwtUtil;
@@ -44,6 +47,7 @@ public class AuthController {
         this.userDetailsServices = userDetailsServices;
         this.otpService = otpService;
         this.emailService = emailService;
+        this.redisUtil = redisUtil;
     }
 
 
@@ -102,5 +106,16 @@ public class AuthController {
         final String jwt = jwtUtil.generateToken(userDetails);
 
         return ResponseEntity.ok(new AuthResponse(jwt));
+    }
+
+    @GetMapping("/test-redis")
+    public String testRedis() {
+        try {
+            redisUtil.set("test", "hello", 60);
+            return redisUtil.get("test");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return e.getMessage();
+        }
     }
 }
