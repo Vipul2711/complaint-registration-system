@@ -70,9 +70,7 @@ export const DepartmentProvider = ({ children }) => {
       results.forEach((r) => {
         all = [...all, ...r.content];
       });
-      console.log("🔥 First Page:", firstData);
-      console.log("🔥 Combined Data:", all);
-
+      
       dispatch({ type: "SET_ALL_DATA", payload: all });
     } catch (err) {
       dispatch({

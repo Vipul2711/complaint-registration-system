@@ -28,7 +28,7 @@ function LocationMarker({
   return position ? <Marker position={position} /> : null;
 }
 
-// 🎯 Move map when position changes
+//  Move map when position changes
 function ChangeView({ position }) {
   const map = useMap();
 

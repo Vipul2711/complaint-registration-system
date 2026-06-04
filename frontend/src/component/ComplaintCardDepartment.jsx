@@ -6,7 +6,7 @@ function DepartmentComplaintCard({ complaint, onStart, onResolve, loadingId }) {
   const formatDate = (date) =>
     new Date(date).toLocaleString("en-IN");
 
-  // 🎯 SAME COLORS AS USER PANEL
+  // SAME COLORS AS USER PANEL
   const statusConfig = {
     SUBMITTED: {
       label: "Submitted",

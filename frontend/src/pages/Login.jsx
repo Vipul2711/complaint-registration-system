@@ -26,7 +26,6 @@ function Login() {
       });
 
       const data = await res.json();
-      console.log(data);
 
       if (!res.ok) {
         throw new Error(data.message || "Login Failed");
@@ -39,7 +38,7 @@ function Login() {
       }
 
       const user = login(token);
-      console.log("user after the login :", user);
+     
 
       if (user.roles.includes("ADMIN")) {
         navigate("/admin/dashboard");
